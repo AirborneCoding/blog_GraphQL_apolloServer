@@ -51,9 +51,12 @@ async function startApp() {
     app.use("/api/v1/users", usersRouter)
     app.use("/api/v1/posts", postsRouter)
     // graphql
-    app.use("/graphql", expressMiddleware(apolloServer, {
-        context: async ({ req, res }) => ({ req, pubSub })
+    app.use("/graphql", cors(), expressMiddleware(apolloServer, {
+        context: async ({ req, res }) => ({ req, pubSub }),
+
     }))
+
+
 
     // use error handling middlewares
     app.use(notFoundMiddleware)

@@ -12,7 +12,10 @@ export function logoutUser() {
 
 export const developmentUrl = "http://localhost:5000"
 
-export const developmentUrlGraphql =  "http://localhost:5000/graphql"
+// export const developmentUrlGraphql =  "http://localhost:5000/graphql"
+export const developmentUrlGraphql = "https://blog-graphql-apollo-server.vercel.app/graphql"
+
+// https://blog-graphql-apollo-server.vercel.app/
 export const developmentUrlRestFull = "http://localhost:5000/api/v1"
 
 // export const developmentUrlGraphql =  import.meta.env.VITE_ORIGINEGraph
