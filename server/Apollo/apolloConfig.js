@@ -3,8 +3,13 @@ const { ApolloServer } = require("@apollo/server");
 const { StatusCodes } = require("http-status-codes");
 // const { PubSub } = require("graphql-subscriptions");
 
-const typeDefs = require("../graphQL/typeDefs/index.js");
-const resolvers = require("../graphQL/resolvers/index.js");
+// const typeDefs = require("../graphQL/typeDefs/index.js");
+// const resolvers = require("../graphQL/resolvers/index.js");
+
+const path = require('path');
+
+const typeDefs = require(path.resolve(__dirname, '../graphQL/typeDefs/index.js'));
+const resolvers = require(path.resolve(__dirname, '../graphQL/resolvers/index.js'));
 
 // const pubSub = new PubSub();
 
