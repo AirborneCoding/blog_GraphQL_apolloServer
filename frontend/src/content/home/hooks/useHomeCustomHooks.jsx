@@ -9,7 +9,7 @@ import {
     useMutation,
 } from "@tanstack/react-query";
 import { useIntersection } from "@mantine/hooks";
-import { fetchHomePosts, fetchTop5AuthorsAPI, fetchTop5_C_H_API, handleLikeApi } from "../Apis";
+import { fetchHomePosts, fetchTop5AuthorsAPI, fetchTop5_C_H_API, handleLikeApi } from "../apis";
 
 const useFetchHomePosts = () => {
 
