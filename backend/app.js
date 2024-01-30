@@ -71,6 +71,7 @@ async function startServer() {
         await server.start();
 
         // use packages & routes
+        app.use("posts", postsRouter)
 
         // restFull
         app.use(helmet());
