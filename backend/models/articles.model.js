@@ -106,9 +106,10 @@ const ArticleSchema = new mongoose.Schema(
 // });
 
 ArticleSchema.pre('save', function (next) {
-    // Use UUID as a unique identifier for the slug
-    const uniqueIdentifier = uuidv4();
-    this.slug = slugify(`${this.title}-${uniqueIdentifier}`, { lower: true });
+    if (!this.slug) {
+        const uniqueIdentifier = uuidv4();
+        this.slug = slugify(`${this.title}-${uniqueIdentifier}`, { lower: true });
+    }
     next();
 });
 
