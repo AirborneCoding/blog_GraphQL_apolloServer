@@ -1,0 +1,47 @@
+const { Server } = require("socket.io");
+
+const io = new Server({
+    cors: {
+        origin: "http://localhost:5174"
+    }
+});
+
+let onlineUsers = [];
+
+const addNewUser = (username, socketId) => {
+    !onlineUsers.some((user) => user.username === username) &&
+        onlineUsers.push({ username, socketId });
+};
+
+const removeUser = (socketId) => {
+    onlineUsers = onlineUsers.filter((user) => user.socketId !== socketId);
+};
+
+const getUser = (username) => {
+    return onlineUsers.find((user) => user.username === username);
+};
+
+io.on("connection", (socket) => {
+    socket.on("newUser", (username) => {
+        addNewUser(username, socket.id);
+    });
+
+    socket.on("sendNotification", ({ senderName, receiverName, type }) => {
+        const receiver = getUser(receiverName);
+
+        if (receiver) {
+            io.to(receiver.socketId).emit("getNot", {
+                senderName,
+                type
+            });
+        } else {
+            console.log(`Receiver '${receiverName}' not found.`);
+        }
+    });
+
+    socket.on("disconnect", () => {
+        removeUser(socket.id);
+    });
+});
+
+module.exports = io;
