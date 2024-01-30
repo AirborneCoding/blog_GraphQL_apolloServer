@@ -16,6 +16,7 @@ const { cloudinaryRemoveImage, uploadImageCloudinary } = require("../../../utils
  * @access  private (logged users && user account owner)
 ------------------------------------------------*/
 const getUserProfile = async (parent, args, context, info) => {
+    console.log(context);
     authenticateUser_graphql(context)
     const userId = context?.user?.userId
 

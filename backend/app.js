@@ -61,7 +61,7 @@ const httpServer = http.createServer(app);
 const server = new ApolloServer({
     typeDefs,
     resolvers,
-    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+    plugins: [ApolloServerPluginDrainHttpServer({ httpServer, })],
 });
 
 async function startServer() {
@@ -88,7 +88,10 @@ async function startServer() {
             '/graphql',
             cors(),
             express.json(),
-            expressMiddleware(server),
+            expressMiddleware(server, {
+                context: async ({ req, res }) => ({ req, res }),
+            }),
+
         );
 
         // use error handling middlewares
