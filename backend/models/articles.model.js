@@ -98,20 +98,22 @@ const ArticleSchema = new mongoose.Schema(
 );
 
 
-// ArticleSchema.pre('save', function (next) {
-//     // Append a unique identifier to the slug
-//     const uniqueIdentifier = Date.now(); // You can use any other method to generate a unique identifier
-//     this.slug = slugify(`${this.title}-${uniqueIdentifier}`, { lower: true });
-//     next();
-// });
-
 ArticleSchema.pre('save', function (next) {
     if (!this.slug) {
-        const uniqueIdentifier = uuidv4();
+        const uniqueIdentifier = Date.now(); 
         this.slug = slugify(`${this.title}-${uniqueIdentifier}`, { lower: true });
     }
     next();
 });
+
+//* using uuid
+// ArticleSchema.pre('save', function (next) {
+//     if (!this.slug) {
+//         const uniqueIdentifier = uuidv4();
+//         this.slug = slugify(`${this.title}-${uniqueIdentifier}`, { lower: true });
+//     }
+//     next();
+// });
 
 // Populate Comment For This Post
 ArticleSchema.virtual("comments", {
