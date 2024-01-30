@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const slugify = require("slugify");
+const { v4: uuidv4 } = require('uuid');
 
 const CATEGORIES = {
     'ACADEMIC_EDUCATION': 'academic & education',
@@ -97,9 +98,16 @@ const ArticleSchema = new mongoose.Schema(
 );
 
 
+// ArticleSchema.pre('save', function (next) {
+//     // Append a unique identifier to the slug
+//     const uniqueIdentifier = Date.now(); // You can use any other method to generate a unique identifier
+//     this.slug = slugify(`${this.title}-${uniqueIdentifier}`, { lower: true });
+//     next();
+// });
+
 ArticleSchema.pre('save', function (next) {
-    // Append a unique identifier to the slug
-    const uniqueIdentifier = Date.now(); // You can use any other method to generate a unique identifier
+    // Use UUID as a unique identifier for the slug
+    const uniqueIdentifier = uuidv4();
     this.slug = slugify(`${this.title}-${uniqueIdentifier}`, { lower: true });
     next();
 });

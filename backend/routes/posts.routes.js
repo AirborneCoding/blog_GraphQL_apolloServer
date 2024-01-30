@@ -16,6 +16,6 @@ router.route("/:id")
     .patch(authenticateUser_RestApis, updatePost)
     .put(authenticateUser_RestApis, handleLike);
 
-router.put("/views/:postSlug", handlePostsViews)
+router.patch("/views/:postSlug", handlePostsViews)
 
 module.exports = router
