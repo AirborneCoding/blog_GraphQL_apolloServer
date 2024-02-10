@@ -17,6 +17,7 @@ const xss = require('xss-clean');
 const cors = require("cors")
 const mongoSanitize = require('express-mongo-sanitize');
 
+
 // use routes
 const usersRouter = require("./routes/users.routes")
 const postsRouter = require("./routes/posts.routes")
@@ -64,10 +65,16 @@ const server = new ApolloServer({
     plugins: [ApolloServerPluginDrainHttpServer({ httpServer, })],
 });
 
+
+const { client } = require("./utils/cache")
+
 async function startServer() {
+
     try {
 
         await connectDB(process.env.MONGO_URI);
+        await client.connect();
+        client.on('error', err => console.log('Redis Client Error', err));
         await server.start();
 
         // use packages & routes
@@ -103,7 +110,7 @@ async function startServer() {
             console.log(`🚀 Server ready at http://localhost:${PORT}/graphql`);
         });
     } catch (error) {
-        console.log("Failed to connect to the database:", error);
+        console.log("Something went wrong: ", error);
     }
 }
 

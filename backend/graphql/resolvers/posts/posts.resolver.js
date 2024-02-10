@@ -6,7 +6,7 @@ const mongoose = require("mongoose")
 const { checkPermissions } = require("../../../utils/secure")
 const { UserInputError, ApolloError } = require("apollo-server")
 const { authenticateUser_graphql } = require("../../../middleware/authenticationJWT")
-
+const { getDataFromRedisOrAPI } = require("../../../utils/cache")
 // TODO : notifications
 // todo : follow author
 
@@ -17,58 +17,125 @@ const { authenticateUser_graphql } = require("../../../middleware/authentication
  * @access  public 
 ------------------------------------------------*/
 const getAllPosts = async (parent, args, context, info) => {
-    const { search, category, hashtags } = args;
-    let filterObject = {};
+    const cacheKey = "all_posts";
 
-    if (search) {
-        const searchRegex = new RegExp(search, 'i');
-        filterObject.$or = [
-            { title: { $regex: searchRegex.source, $options: 'i' } },
-            { hashtags: { $regex: searchRegex.source, $options: 'i' } },
-            { content: { $regex: searchRegex.source, $options: 'i' } },
-            { category: { $regex: searchRegex.source, $options: 'i' } },
-            { 'user.username': { $regex: searchRegex.source, $options: 'i' } },
-        ];
-    }
+    const posts = await getDataFromRedisOrAPI(cacheKey, async () => {
+        const { search, category, hashtags } = args;
+        let filterObject = {};
 
-    if (hashtags) {
-        filterObject.hashtags = hashtags
-    }
-    if (category) {
-        filterObject.category = category
-    }
+        if (search) {
+            const searchRegex = new RegExp(search, 'i');
+            filterObject.$or = [
+                { title: { $regex: searchRegex.source, $options: 'i' } },
+                { hashtags: { $regex: searchRegex.source, $options: 'i' } },
+                { content: { $regex: searchRegex.source, $options: 'i' } },
+                { category: { $regex: searchRegex.source, $options: 'i' } },
+                { 'user.username': { $regex: searchRegex.source, $options: 'i' } },
+            ];
+        }
 
-    filterObject.postStatus = "published"
+        if (hashtags) {
+            filterObject.hashtags = hashtags
+        }
+        if (category) {
+            filterObject.category = category
+        }
 
-    let result = Post.find(filterObject).populate({
-        path: 'user',
-    })
-        .sort("-createdAt")
+        filterObject.postStatus = "published"
+
+        let result = Post.find(filterObject).populate({
+            path: 'user',
+        })
+            .sort("-createdAt")
 
 
-    // Pagination logic
-    const pageInt = Number(args.page) || 1;
-    const pageSizeInt = Number(args.pageSize) || 2; // limit
-    const skip = (pageInt - 1) * pageSizeInt;
+        // Pagination logic
+        const pageInt = Number(args.page) || 1;
+        const pageSizeInt = Number(args.pageSize) || 2; // limit
+        const skip = (pageInt - 1) * pageSizeInt;
 
-    result = result.skip(skip).limit(pageSizeInt);
+        result = result.skip(skip).limit(pageSizeInt);
 
-    let posts = await result;
+        let posts = await result;
 
-    const totalPosts = await Post.countDocuments(filterObject);
+        const totalPosts = await Post.countDocuments(filterObject);
 
-    const pageCount = Math.ceil(totalPosts / pageSizeInt);
+        const pageCount = Math.ceil(totalPosts / pageSizeInt);
 
-    const pagination = {
-        page: pageInt,
-        pageSize: pageSizeInt,
-        pageCount,
-        total: totalPosts,
-    };
+        const pagination = {
+            page: pageInt,
+            pageSize: pageSizeInt,
+            pageCount,
+            total: totalPosts,
+        };
 
-    return { count: posts.length, posts, pagination }
-
+        return { count: posts.length, posts, pagination }
+    });
+    return posts
 }
+
+
+
+
+/* 
+ const { search, category, hashtags } = args;
+        let filterObject = {};
+
+        if (search) {
+            const searchRegex = new RegExp(search, 'i');
+            filterObject.$or = [
+                { title: { $regex: searchRegex.source, $options: 'i' } },
+                { hashtags: { $regex: searchRegex.source, $options: 'i' } },
+                { content: { $regex: searchRegex.source, $options: 'i' } },
+                { category: { $regex: searchRegex.source, $options: 'i' } },
+                { 'user.username': { $regex: searchRegex.source, $options: 'i' } },
+            ];
+        }
+
+        if (hashtags) {
+            filterObject.hashtags = hashtags
+        }
+        if (category) {
+            filterObject.category = category
+        }
+
+        filterObject.postStatus = "published"
+
+        let result = Post.find(filterObject).populate({
+            path: 'user',
+        })
+            .sort("-createdAt")
+
+
+        // Pagination logic
+        const pageInt = Number(args.page) || 1;
+        const pageSizeInt = Number(args.pageSize) || 2; // limit
+        const skip = (pageInt - 1) * pageSizeInt;
+
+        result = result.skip(skip).limit(pageSizeInt);
+
+        let posts = await result;
+
+        const totalPosts = await Post.countDocuments(filterObject);
+
+        const pageCount = Math.ceil(totalPosts / pageSizeInt);
+
+        const pagination = {
+            page: pageInt,
+            pageSize: pageSizeInt,
+            pageCount,
+            total: totalPosts,
+        };
+
+        return { count: posts.length, posts, pagination }
+*/
+
+
+
+
+
+
+
 
 /**-----------------------------------------------
  * @desc    get single post
